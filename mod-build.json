@@ -1,0 +1,7 @@
+{
+  "repository": "Briefcase.PregameTimer",
+  "target": "PregameTimer",
+  "sdkVersion": "0.3.0",
+  "sdkRepository": "EnoPM/BriefcaseNative",
+  "sdkSha256": ""
+}
