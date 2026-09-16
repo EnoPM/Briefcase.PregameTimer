@@ -76,14 +76,14 @@ Edit `Briefcase/Mods/briefcase.pregame-timer/Data/config.json`:
 ```json
 {
   "durationSeconds": 90,
-  "diagnostics": true
+  "diagnostics": false
 }
 ```
 
 | Setting | Allowed values | Description |
 | --- | --- | --- |
 | `durationSeconds` | `1` to `3600` | Lobby countdown duration in seconds. |
-| `diagnostics` | `true` or `false` | Records a bounded set of deployment diagnostics in the Briefcase log. |
+| `diagnostics` | `true` or `false` | Records a bounded set of deployment diagnostics in the Briefcase log. Disabled by default. |
 
 Restart the server after changing these values. The settings can also be changed from the Briefcase server administration interface.
 

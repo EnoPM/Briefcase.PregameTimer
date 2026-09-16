@@ -20,7 +20,8 @@ int main() {
     try {
         auto schema = nlohmann::json::parse(pregame::schema);
         auto defaults = config_defaults(schema);
-        check(pregame::Config::parse(defaults.dump()).duration == 90);
+        const auto config = pregame::Config::parse(defaults.dump());
+        check(config.duration == 90 && !config.diagnostics);
         for (int seconds = 1; seconds <= 3600; ++seconds) {
             auto j = defaults;
             j["durationSeconds"] = seconds;

@@ -7,13 +7,13 @@ inline constexpr auto schema = R"({
  "type":"object","properties":{
   "durationSeconds":{"type":"integer","minimum":1,"maximum":3600,"default":90,
     "description":"Vanilla lobby countdown duration after the first Deploy. Restart required."},
-  "diagnostics":{"type":"boolean","default":true,
+  "diagnostics":{"type":"boolean","default":false,
     "description":"Log at most 12 observed deployment events per server run."}
  }
 })";
 struct Config {
     int32_t duration = 90;
-    bool diagnostics = true;
+    bool diagnostics = false;
     static Config parse(const std::string &text) {
         auto j = nlohmann::json::parse(text);
         const auto &v = j.at("durationSeconds");
