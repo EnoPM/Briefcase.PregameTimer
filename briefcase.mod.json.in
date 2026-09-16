@@ -1,6 +1,6 @@
 {
   "schemaVersion":1,"id":"briefcase.pregame-timer","name":"Pregame Lobby Timer",
-  "author":"BriefcaseNative","version":"0.3.0","entry":"Briefcase.PregameTimer.dll",
+  "author":"BriefcaseNative","version":"@MOD_VERSION@","entry":"Briefcase.PregameTimer.dll",
   "minimumApi":1,"environment":"server","loadPhase":"ready",
   "capabilities":["log","config","game-thread","unreal.reflection","unreal.invoke","unreal.hooks","unreal.lifecycle"],
   "dependencies":[]
