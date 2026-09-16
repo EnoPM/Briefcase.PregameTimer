@@ -1,45 +1,131 @@
 # Briefcase Pregame Timer
 
-Pregame Timer is a native BriefcaseNative server mod that controls the duration of the pregame lobby countdown on a Deceive Inc. dedicated server.
+Pregame Timer controls the pregame lobby countdown on a Deceive Inc. dedicated server. It is a native server mod for [BriefcaseNative](https://github.com/EnoPM/BriefcaseNative) and supports Windows x64 and Linux x64 servers.
 
-## Installation
+## Complete server installation
 
-1. Install [BriefcaseNative](https://github.com/EnoPM/BriefcaseNative) on the dedicated server.
-2. Download the release archive that matches the server platform: `windows-x64` or `linux-x64`.
-3. Stop the server and extract the archive into its binary directory (`Binaries/Win64` on Windows or `Binaries/Linux` on Linux).
-4. Keep an existing `Briefcase/Mods/briefcase.pregame-timer/Data/config.json` file when updating.
-5. Start the server through the Briefcase launcher.
+### 1. Install the Deceive Inc. dedicated server
 
-BriefcaseNative 0.6.0 and later can update an installed copy automatically before the server starts. The mod repository must be publicly accessible for anonymous update checks.
+Install [SteamCMD](https://developer.valvesoftware.com/wiki/SteamCMD), then download the dedicated server anonymously. App `5007710` is the Deceive Inc. dedicated server.
 
-## Configuration
-
-The configuration is stored in `Briefcase/Mods/briefcase.pregame-timer/Data/config.json`. It can also be edited through the Briefcase server administration interface.
-
-## Build and test
-
-Windows builds require the Visual Studio C++ x64 tools and PowerShell 7:
+On Windows:
 
 ```powershell
-./scripts/Build.ps1
+steamcmd.exe +force_install_dir "C:\DeceiveIncServer" +login anonymous +app_update 5007710 validate +quit
 ```
 
-The script downloads the pinned BriefcaseNative SDK, compiles and tests the real mod DLL against a mock ABI host, and creates the release archive. To use an extracted SDK without downloading it:
+On Linux:
+
+```bash
+./steamcmd.sh +force_install_dir /opt/deceive-inc-server +login anonymous +app_update 5007710 validate +quit
+```
+
+The server binary directory used throughout this guide is:
+
+- Windows: `C:\DeceiveIncServer\DeceiveInc\Binaries\Win64`
+- Linux: `/opt/deceive-inc-server/DeceiveInc/Binaries/Linux`
+
+### 2. Install BriefcaseNative
+
+Stop the server and open the [latest BriefcaseNative release](https://github.com/EnoPM/BriefcaseNative/releases/latest).
+
+On Windows, download `BriefcaseNative-Server-windows-x64-<version>.zip` and extract it directly into `DeceiveInc\Binaries\Win64`. Create `Briefcase\launch.json` in that directory:
+
+```json
+{
+  "serverWin64": "C:\\DeceiveIncServer\\DeceiveInc\\Binaries\\Win64"
+}
+```
+
+On Linux, install the native runtime dependencies. For Ubuntu 24.04:
+
+```bash
+sudo apt-get update
+sudo apt-get install --no-install-recommends libcurl4t64 libarchive13t64 ca-certificates unzip
+```
+
+Download `BriefcaseNative-Server-linux-x64-<version>.zip`, extract it directly into `DeceiveInc/Binaries/Linux`, and make the launcher executable:
+
+```bash
+chmod +x Briefcase.ServerLauncher
+```
+
+### 3. Install Pregame Timer
+
+Open the [latest Pregame Timer release](https://github.com/EnoPM/Briefcase.PregameTimer/releases/latest) and download the archive for the server operating system:
+
+- `Briefcase.PregameTimer-windows-x64-<version>.zip`
+- `Briefcase.PregameTimer-linux-x64-<version>.zip`
+
+Stop the server and extract the archive directly into the same server binary directory used for BriefcaseNative. The resulting layout must include:
+
+```text
+DeceiveInc/
+└── Binaries/
+    └── Win64/ or Linux/
+        ├── Briefcase.ServerLauncher[.exe]
+        └── Briefcase/
+            └── Mods/
+                └── briefcase.pregame-timer/
+                    ├── briefcase.mod.json
+                    ├── Briefcase.PregameTimer.dll or Briefcase.PregameTimer.so
+                    └── Data/
+                        └── config.json
+```
+
+Do not extract the archive into a second `Win64`, `Linux`, or `Briefcase` directory. When updating manually, keep the existing `Data/config.json` file.
+
+### 4. Configure the countdown
+
+Edit `Briefcase/Mods/briefcase.pregame-timer/Data/config.json`:
+
+```json
+{
+  "durationSeconds": 90,
+  "diagnostics": true
+}
+```
+
+| Setting | Allowed values | Description |
+| --- | --- | --- |
+| `durationSeconds` | `1` to `3600` | Lobby countdown duration in seconds. |
+| `diagnostics` | `true` or `false` | Records a bounded set of deployment diagnostics in the Briefcase log. |
+
+Restart the server after changing these values. The settings can also be changed from the Briefcase server administration interface.
+
+### 5. Start and verify the server
+
+Always start the server through the Briefcase launcher so framework and mod updates run before the game starts.
+
+On Windows, run this from `DeceiveInc\Binaries\Win64`:
 
 ```powershell
-./scripts/Build.ps1 -SdkPath C:/path/to/BriefcaseNative-SDK
+.\Briefcase.ServerLauncher.exe
 ```
 
-Linux builds require x64 Linux, Clang 19, CMake 3.28, Ninja, and Python 3:
+On Linux, run this from `DeceiveInc/Binaries/Linux`:
 
-```sh
-python3 scripts/build-linux.py --sdk /path/to/BriefcaseNative-SDK
+```bash
+./Briefcase.ServerLauncher
 ```
 
-The Linux package contains native code and data and does not require Python at runtime.
+Check `Briefcase/Logs/BriefcaseNative.log` for a successful load of `briefcase.pregame-timer`. Launcher and update details are written to `Briefcase/Logs/launcher.log` and `Briefcase/Updates/last-result.json`.
 
-## Releases
+## Automatic updates
 
-`VERSION` is the only source of the mod version. A push to `main` that changes this file builds and tests Windows and Linux, then publishes both native archives. The workflow can also be started manually and can create a draft release.
+BriefcaseNative 0.6.0 or later checks this repository's stable releases before starting the server. Automatic updates work when:
 
-GitHub records the SHA-256 digest of each uploaded asset. Existing release versions are never replaced.
+- this repository is publicly accessible;
+- the installed manifest contains the `github-releases` update information supplied by a current release;
+- `Briefcase/updater.json` has `enabled` set to `true` and does not set `updateMods` to `false`;
+- the server is started or restarted through `Briefcase.ServerLauncher`.
+
+If the mod was installed before automatic update metadata was added, install the latest release manually once. Briefcase preserves `Data/config.json` during subsequent automatic updates. A network or validation failure keeps the installed version and lets the server start.
+
+## Remove the mod
+
+Stop the server, remove `Briefcase/Mods/briefcase.pregame-timer`, then start the server through the Briefcase launcher.
+
+## Contributing
+
+Build, test, and release information is kept in [CONTRIBUTING.md](CONTRIBUTING.md).
